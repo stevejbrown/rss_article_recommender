@@ -15,7 +15,7 @@ class TestZoteroLibrary(unittest.TestCase):
     def test_get_library(self):
         self.test_library.read_library(self.test_data)
         out_library = self.test_library.get_library()
-        col_names = ['Title', 'Abstract Note']
+        col_names = ['Title', 'Abstract']
         for name in col_names:
             self.assertTrue(name in list(out_library))
 
