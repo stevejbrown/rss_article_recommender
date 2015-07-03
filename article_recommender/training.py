@@ -8,6 +8,7 @@ class TrainingData(object):
     def __init__(self, library):
         ''' library should be a dataframe with 'Title' and 'Abstract' columns '''
         self.library = library
+        self.cleaned_library = []
 
     def row_to_words(self, row):
         ''' Function to convert a raw entry in library entry to a string of words
@@ -33,3 +34,8 @@ class TrainingData(object):
         # Join the words back into one string separated by a space,
         # and return the result
         return(" ".join(meaningful_words))
+
+    def clean_library(self):
+        ''' Cleans the library with row_to_words and stores it in self.cleaned_library '''
+        self.cleaned_library = self.library.apply(self.row_to_words, axis = 1)
+        pass

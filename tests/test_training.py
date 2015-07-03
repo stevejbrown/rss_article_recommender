@@ -37,5 +37,9 @@ class TestTrainingData(unittest.TestCase):
         self.assertEqual(set(self.training_data.row_to_words(row_0).split()), words_row_0)
         self.assertEqual(set(self.training_data.row_to_words(row_1).split()), words_row_1)
 
+    def test_clean_library(self):
+        self.training_data.clean_library()
+        self.assertEqual(len(self.training_data.cleaned_library), 243)
+
 if __name__ == '__main__':
     unittest.main()
