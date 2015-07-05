@@ -2,6 +2,7 @@ import pandas as pd
 import re
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
 
 class TrainingData(object):
     """ TrainingData loads an existing library of articles to train against. """
@@ -59,3 +60,18 @@ class TrainingData(object):
         vocab = self.vectorizer.get_feature_names()
         return [(word, count) for word, count in
                 sorted(zip(vocab, self.weights), key=lambda tup: tup[1], reverse=True)]
+
+    def score_article(self, article):
+        '''
+        Scores an article string by counting the number of times each word in vectorizer occurs and
+        then weights by the number of times the word occurs in the original training set. It then
+        normalizes this pre-score by the number of words in the article_string + 1 (to prevent
+        divide by zero for empty article strings).
+
+        Returns a numpy array with a single element with the article score.
+        '''
+
+        num_words = len(article.split())
+        vectorized_article = self.vectorizer.transform([article])
+        vectorized_article = vectorized_article.toarray()
+        return np.dot(vectorized_article, self.weights)/(float(num_words+1))

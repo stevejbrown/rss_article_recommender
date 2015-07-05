@@ -96,5 +96,12 @@ class TestTrainingData(unittest.TestCase):
         all_elem_equal = (self.training_data.weights == correct_weights).all()
         self.assertTrue(all_elem_equal)
 
+    def test_score_article(self):
+        self.training_data.train_vectorizer()
+        test_article = ' '.join(self.training_data.vectorizer.get_feature_names())
+        score = self.training_data.score_article(test_article)
+        self.assertEqual(score,
+                         self.training_data.weights.sum()/float(len(self.training_data.weights)+1))
+
 if __name__ == '__main__':
     unittest.main()
