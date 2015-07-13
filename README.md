@@ -1,5 +1,5 @@
 # RSS Article Recommender
-
+A library for suggesting new rss articles to read based on articles in a user's reference manager.
 ## Getting started
 
 ### Dependencies
