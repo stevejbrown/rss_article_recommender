@@ -9,10 +9,10 @@ class ZoteroLibrary(object):
     def read_library(self, library_csv):
         self.library_df = pd.read_csv(library_csv)
 
-    def consolidate_zotero_library(self):
+    def consolidate(self):
         ''' Reduces the full zotero dataframe to Title and Abstract columns '''
         consolidated_library = self.library_df[['Title','Abstract Note']]
         return consolidated_library.rename(columns={'Abstract Note': 'Abstract'})
 
     def get_library(self):
-        return self.consolidate_zotero_library()
+        return self.consolidate()
