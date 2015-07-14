@@ -1,1 +1,4 @@
 *.pyc
+inputs/feedly_client_token.txt
+inputs/zotero_library.csv
+.ipynb_checkpoints/
