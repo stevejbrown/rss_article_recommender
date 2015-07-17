@@ -6,7 +6,7 @@ A library for suggesting new rss articles to read based on articles in a user's 
   * python-feedly (see below)
   * BeautifulSoup4
   * pandas
-  * nltk (The natural language toolkit)
+  * nltk (The natural language toolkit) -- make sure to load stopwords first 
   * scikit-learn
   * numpy
 
