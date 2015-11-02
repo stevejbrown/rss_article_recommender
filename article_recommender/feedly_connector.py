@@ -52,7 +52,7 @@ class FeedlyStream(object):
         # and return the result
         return(" ".join(meaningful_words))
 
-    def score_stream(self, stream, training_data):
+    def score_stream(self, stream, training_data, vectorizer='count'):
         ''' Scores all the items in a stream and returns a list of [title, url, score] '''
         score_list = []
         for item in stream[u'items']:
@@ -65,8 +65,12 @@ class FeedlyStream(object):
             except KeyError:
                 article_content = ""
             article_words = article_title + " " + article_content
-            score_list.append([raw_title, article_url,
-                               float(training_data.score_article(article_words))])
+            if vectorizer == 'count':
+                score_list.append([raw_title, article_url,
+                                   float(training_data.score_article_count(article_words))])
+            elif vectorizer == 'tfidf':
+                score_list.append([raw_title, article_url,
+                                   float(training_data.score_article_tfidf(article_words))])
         return score_list
 
     def load_category(self, category, articles_per_stream=500):
@@ -83,14 +87,15 @@ class FeedlyStream(object):
                     self.streams[category].append(stream)
         pass
 
-    def rank_all(self, training_data):
+    def rank_all(self, training_data, vectorizer='count'):
         ''' Ranks all articles in the self.streams dictionary with scoring from training_data.
             Outputs: A sorted list of [title, url, score]
         '''
         rank_list = []
         for category in self.streams:
             for stream in self.streams[category]:
-                rank_list = rank_list + self.score_stream(stream, training_data)
+                rank_list = rank_list + self.score_stream(stream, training_data,
+                                                          vectorizer=vectorizer)
         rank_df = pd.DataFrame(data=sorted(rank_list, key=lambda entry: entry[-1], reverse=True),
                                columns=['Title', 'Url', 'Score'])
         return rank_df

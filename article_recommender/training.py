@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import numpy as np
 
 class TrainingData(object):
@@ -11,11 +11,16 @@ class TrainingData(object):
         ''' library should be a dataframe with 'Title' and 'Abstract' columns '''
         self.library = library
         self.cleaned_library = None
-        self.vectorizer = CountVectorizer(analyzer = "word",
-                                          tokenizer = None,
-                                          preprocessor = None,
-                                          stop_words = None,
-                                          max_features = 1000)
+        self.count_vectorizer = CountVectorizer(analyzer = "word",
+                                                tokenizer = None,
+                                                preprocessor = None,
+                                                stop_words = None,
+                                                max_features = 1000)
+        self.tfidf_vectorizer = TfidfVectorizer(analyzer = "word",
+                                               tokenizer = None,
+                                               preprocessor = None,
+                                               stop_words = None,
+                                               max_features = 1000)
         self.weights = None
 
     def row_to_words(self, row):
@@ -48,20 +53,29 @@ class TrainingData(object):
         self.cleaned_library = self.library.apply(self.row_to_words, axis = 1)
         pass
 
-    def train_vectorizer(self):
-        ''' Trains the CountVectorizer (bag of words) model on the training data '''
+    def __train_vectorizer(self, vectorizer):
+        ''' Trains a vectorizer on the training data '''
         if type(self.cleaned_library) == type(None):
             self.clean_library()
-        train_data_features = self.vectorizer.fit_transform(self.cleaned_library)
+        train_data_features = vectorizer.fit_transform(self.cleaned_library)
         train_data_features = train_data_features.toarray() # Numpy arrays are easier to work with
         self.weights = train_data_features.sum(axis=0)
 
         # Return a list of (word, count) touples for possible output
-        vocab = self.vectorizer.get_feature_names()
+        vocab = vectorizer.get_feature_names()
         return [(word, count) for word, count in
                 sorted(zip(vocab, self.weights), key=lambda tup: tup[1], reverse=True)]
 
-    def score_article(self, article):
+    def train_count_vectorizer(self):
+        ''' Trains a Count vectorizer (bag of words) model '''
+        return self.__train_vectorizer(self.count_vectorizer)
+
+    def train_tfidf_vectorizer(self):
+        ''' Trains the TfidfVectorizer (term frequency inverse document frequency) model on the
+            training data '''
+        return self.__train_vectorizer(self.tfidf_vectorizer)
+
+    def __score_article(self, article, vectorizer):
         '''
         Scores an article string by counting the number of times each word in vectorizer occurs and
         then weights by the number of times the word occurs in the original training set. It then
@@ -72,6 +86,16 @@ class TrainingData(object):
         '''
 
         num_words = len(article.split())
-        vectorized_article = self.vectorizer.transform([article])
+        vectorized_article = vectorizer.transform([article])
         vectorized_article = vectorized_article.toarray()
         return np.dot(vectorized_article, self.weights)/(float(num_words+1))
+
+    def score_article_count(self, article):
+        ''' Scores a Count vecotrizer '''
+        return self.__score_article(article, self.count_vectorizer)
+
+    def score_article_tfidf(self, article):
+        ''' Scores a Tfidf vectorizer. Tfidf already normalizes by document size so we reverse
+            the normalization of __score_article. '''
+        num_words = len(article.split())
+        return self.__score_article(article, self.tfidf_vectorizer)*(num_words+1)
