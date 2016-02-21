@@ -60,6 +60,7 @@ class TrainingData(object):
         train_data_features = vectorizer.fit_transform(self.cleaned_library)
         train_data_features = train_data_features.toarray() # Numpy arrays are easier to work with
         self.weights = train_data_features.sum(axis=0)
+        self.weights = self.weights/np.linalg.norm(self.weights) # Normalize
 
         # Return a list of (word, count) touples for possible output
         vocab = vectorizer.get_feature_names()
