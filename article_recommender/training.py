@@ -76,7 +76,7 @@ class TrainingData(object):
             training data '''
         return self.__train_vectorizer(self.tfidf_vectorizer)
 
-    def __score_article(self, article, vectorizer):
+    def __old_score_article(self, article, vectorizer):
         '''
         Scores an article string by counting the number of times each word in vectorizer occurs and
         then weights by the number of times the word occurs in the original training set. It then
@@ -90,6 +90,19 @@ class TrainingData(object):
         vectorized_article = vectorizer.transform([article])
         vectorized_article = vectorized_article.toarray()
         return np.dot(vectorized_article, self.weights)/(float(num_words+1))
+
+    def __score_article(self, article, vectorizer):
+            '''
+            Scores an article string by cosine similarity to average library vector. It  adds an
+            additional 1 in the normalizing denominator to prevent divide by zero for empty article
+            strings.
+
+            Returns a numpy array with a single element with the article score.
+            '''
+
+            vectorized_article = vectorizer.transform([article])
+            vectorized_article = vectorized_article.toarray()
+            return np.dot(vectorized_article, self.weights)/(np.linalg.norm(vectorized_article)+1)
 
     def score_article_count(self, article):
         ''' Scores a Count vecotrizer '''
